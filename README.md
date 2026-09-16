@@ -34,22 +34,22 @@
 <table>
   <tr>
     <td width="50%">
-      <img src="docs/screenshots/vault-unlocked.png" alt="Cofre desbloqueado" width="100%"/>
-      <p align="center"><b>Dashboard do Cofre Desbloqueado</b></p>
+      <img src="photos/home.png" alt="Dashboard do Pass-Man" width="100%"/>
+      <p align="center"><b>Dashboard do Cofre</b></p>
     </td>
     <td width="50%">
-      <img src="docs/screenshots/generator-modal.png" alt="Gerador de senhas" width="100%"/>
+      <img src="photos/pass_generator.png" alt="Gerador de Senhas" width="100%"/>
       <p align="center"><b>Gerador Criptográfico de Senhas</b></p>
     </td>
   </tr>
   <tr>
     <td width="50%">
-      <img src="docs/screenshots/backup-export.png" alt="Exportação de backup" width="100%"/>
-      <p align="center"><b>Exportação / Backup Autenticado</b></p>
+      <img src="photos/first-access.png" alt="Primeiro Acesso" width="100%"/>
+      <p align="center"><b>Primeiro Acesso e Configuração</b></p>
     </td>
     <td width="50%">
-      <img src="docs/screenshots/dark-light-theme.png" alt="Temas claro e escuro" width="100%"/>
-      <p align="center"><b>Suporte a Temas Dark / Light</b></p>
+      <img src="photos/score.png" alt="Sistema de Pontuação" width="100%"/>
+      <p align="center"><b>Gamificação e Score de Segurança</b></p>
     </td>
   </tr>
 </table>
