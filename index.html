@@ -1,0 +1,253 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Pass-Man — gerenciador local de credenciais para ambientes OT.">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; font-src 'self'; img-src 'self' data:; connect-src 'none'; object-src 'none'; base-uri 'none'; frame-src 'none'; form-action 'self'">
+  <title>Pass-Man | Cofre OT</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="app-shell">
+    <aside class="sidebar" aria-label="Navegação principal">
+      <button class="sidebar-toggle" id="sidebarToggle" type="button" aria-label="Recolher menu" aria-expanded="true"><span></span><span></span><span></span></button>
+      <a class="brand" href="#" aria-label="Pass-Man, início">
+        <span class="brand-mark chomper-mark" aria-hidden="true">
+          <svg viewBox="0 0 44 32"><path class="chomper" d="M16 16L28 9A14 14 0 1 0 28 23Z"/><circle class="crumb" cx="33" cy="16" r="2"/><path class="mini-lock" d="M38 14v-2a2.5 2.5 0 0 1 5 0v2m-6 0h7v7h-7z"/></svg>
+        </span>
+        <span><strong>PASS-MAN</strong><small>GERENCIADOR DE SENHAS OPERACIONAIS</small></span>
+      </a>
+
+      <nav>
+        <button class="nav-item active" data-view="vault">
+          <span class="nav-icon">⌂</span><span>Cofre de acessos</span><span class="count" id="navCount">0</span>
+        </button>
+        <button class="nav-item" data-view="generator">
+          <span class="nav-icon">✦</span><span>Gerador de senhas</span>
+        </button>
+        <button class="nav-item" data-view="settings">
+          <span class="nav-icon">⚙</span><span>Configurações</span>
+        </button>
+        <button class="nav-item" data-view="score">
+          <span class="nav-icon">★</span><span>Meu score</span>
+        </button>
+        <button class="nav-item" data-view="about">
+          <span class="nav-icon">ⓘ</span><span>Sobre o projeto</span>
+        </button>
+      </nav>
+
+      <div class="sidebar-bottom">
+        <div class="security-status">
+          <span class="pulse-dot"></span>
+          <div><strong>ARMAZENAMENTO LOCAL</strong><small>Dados neste dispositivo</small></div>
+        </div>
+        <button class="nav-item" id="exportBtn"><span class="nav-icon">⇩</span><span>Exportar backup</span></button>
+        <button class="nav-item" id="importBtn"><span class="nav-icon">⇧</span><span>Importar backup</span></button>
+        <input type="file" id="importFile" accept="application/json,.json" hidden>
+        <div class="operator-card">
+          <span class="avatar">OP</span>
+          <span><strong>Operador local</strong><small id="currentDate"></small></span>
+        </div>
+      </div>
+    </aside>
+
+    <main>
+      <header class="topbar">
+        <button class="mobile-menu" id="menuBtn" aria-label="Abrir menu">☰</button>
+        <div class="system-line"><span></span> SISTEMA OPERACIONAL <b>ONLINE</b></div>
+        <div class="topbar-right"><span class="offline-badge"><i></i> MODO OFFLINE</span><span id="clock"></span><button class="theme-toggle" id="themeToggle" aria-label="Ativar tema claro" title="Alternar tema"><span id="themeIcon">☀</span><b id="themeLabel">Tema claro</b></button></div>
+      </header>
+
+      <section class="view active" id="vaultView">
+        <section class="vault-score-panel" aria-label="Resumo do score de proteção">
+          <div class="vault-score-copy"><p class="eyebrow">MEU DESEMPENHO</p><p class="vault-score-label">SCORE DE PROTEÇÃO</p><strong id="mainScore">0 pontos</strong></div>
+          <div class="vault-level"><span class="level-dot" aria-hidden="true"></span><div><small>NÍVEL ATUAL</small><strong id="mainLevel">Iniciante</strong><p>Seu progresso reflete a organização e a força das credenciais do cofre.</p></div></div>
+        </section>
+
+        <div class="page-head vault-heading">
+          <div><p class="eyebrow">GESTÃO DE CREDENCIAIS</p><h1>Cofre de acessos</h1><p class="subtitle">Credenciais críticas, organizadas e disponíveis neste dispositivo.</p></div>
+          <aside class="vault-summary" aria-label="Resumo do cofre">
+            <div><small>TOTAL DE ACESSOS</small><strong id="totalStat">0</strong><span>credenciais armazenadas</span></div>
+            <div><small>ÚLTIMA ATUALIZAÇÃO</small><strong id="lastChange">—</strong><span>registro mais recente</span></div>
+          </aside>
+        </div>
+
+        <div class="toolbar">
+          <label class="search-box"><span>⌕</span><input id="searchInput" type="search" placeholder="Buscar por título ou login..." autocomplete="off"></label>
+          <span class="toolbar-dots" aria-hidden="true">• • • •</span>
+          <span class="result-count" id="resultCount">0 ACESSOS</span>
+          <button class="primary-btn toolbar-new" id="newEntryBtn"><span>＋</span> Novo acesso</button>
+        </div>
+
+        <div class="credentials-grid" id="credentialsGrid"></div>
+        <div class="empty-state" id="emptyState" hidden>
+          <div class="empty-lock">⌾</div><h2>Nenhum acesso encontrado</h2><p>Adicione sua primeira credencial para começar a organizar o ambiente.</p>
+          <button class="secondary-btn" id="emptyAddBtn">Adicionar acesso</button>
+        </div>
+      </section>
+
+      <section class="view" id="generatorView">
+        <div class="page-head">
+          <div><p class="eyebrow">FERRAMENTA DE SEGURANÇA</p><h1>Gerador de senhas</h1><p class="subtitle">Crie senhas fortes com os critérios exigidos pelo seu ambiente.</p></div>
+        </div>
+        <div class="generator-layout">
+          <section class="generator-card">
+            <div class="panel-title"><span>01</span><div><h2>Configuração</h2><p>Defina o padrão da nova senha</p></div></div>
+            <div class="range-head"><label for="lengthRange">Comprimento</label><output id="lengthOutput">18 caracteres</output></div>
+            <input type="range" id="lengthRange" min="6" max="64" value="18">
+            <div class="range-labels"><span>6</span><span>64</span></div>
+            <fieldset>
+              <legend>Tipos de caractere</legend>
+              <label class="check-row"><span><b>ABC</b><span>Letras maiúsculas</span></span><input type="checkbox" id="uppercase" checked><i></i></label>
+              <label class="check-row"><span><b>abc</b><span>Letras minúsculas</span></span><input type="checkbox" id="lowercase" checked><i></i></label>
+              <label class="check-row"><span><b>123</b><span>Números</span></span><input type="checkbox" id="numbers" checked><i></i></label>
+              <label class="check-row"><span><b>#@!</b><span>Símbolos</span></span><input type="checkbox" id="symbols" checked><i></i></label>
+            </fieldset>
+          </section>
+          <section class="generator-card result-panel">
+            <div class="panel-title"><span>02</span><div><h2>Senha gerada</h2><p>Resultado pronto para uso</p></div></div>
+            <div class="generated-box"><code id="generatedPassword"></code><button id="copyGenerated" class="copy-generated" title="Copiar senha">▣ Copiar</button></div>
+            <div class="strength-line"><span>FORÇA</span><div class="strength-track"><i id="strengthBar"></i></div><b id="strengthLabel">FORTE</b></div>
+            <button class="primary-btn full" id="generateBtn">✦ Gerar nova senha</button>
+            <button class="secondary-btn full" id="usePasswordBtn">＋ Usar em um novo acesso</button>
+            <p class="privacy-note">⌾ A senha é gerada localmente e nunca sai deste navegador.</p>
+          </section>
+        </div>
+        <section class="guidance-card">
+          <div class="panel-title"><span>03</span><div><h2>Orientações de criação e gestão</h2><p>Práticas recomendadas para credenciais do ambiente OT</p></div></div>
+          <div class="guidance-grid">
+            <article><b>01</b><h3>Use senhas exclusivas</h3><p>Nunca reutilize a mesma senha entre IHMs, estações de engenharia, servidores e acessos remotos.</p></article>
+            <article><b>02</b><h3>Prefira comprimento</h3><p>Use pelo menos 16 caracteres. Senhas longas e aleatórias são mais resistentes a tentativas automatizadas.</p></article>
+            <article><b>03</b><h3>Controle os privilégios</h3><p>Mantenha contas individuais e conceda somente as permissões necessárias para cada função.</p></article>
+            <article><b>04</b><h3>Revise e revogue</h3><p>Revise acessos periodicamente e remova imediatamente contas de pessoas ou fornecedores desligados.</p></article>
+            <article><b>05</b><h3>Proteja os backups</h3><p>Não envie arquivos por canais inseguros. Mantenha cópias protegidas, controladas e fora da estação operacional.</p></article>
+            <article><b>06</b><h3>Registre mudanças</h3><p>Documente alterações de credenciais e siga os procedimentos de mudança e continuidade da operação.</p></article>
+          </div>
+        </section>
+      </section>
+
+      <section class="view" id="settingsView">
+        <div class="page-head"><div><p class="eyebrow">SEGURANÇA LOCAL</p><h1>Configurações</h1><p class="subtitle">Gerencie a chave usada para liberar o acesso ao Pass-Man.</p></div></div>
+        <section class="settings-card">
+          <div class="panel-title"><span>01</span><div><h2>Alterar chave mestra</h2><p>A nova chave será solicitada no próximo desbloqueio</p></div></div>
+          <form id="changeMasterForm">
+            <label>Chave mestra atual<input id="currentMaster" type="password" required autocomplete="current-password"></label>
+            <label>Nova chave mestra<input id="newMaster" type="password" required minlength="8" autocomplete="new-password"></label>
+            <label>Confirme a nova chave<input id="confirmNewMaster" type="password" required minlength="8" autocomplete="new-password"></label>
+            <div class="settings-note">A sessão é bloqueada automaticamente após 1 hora. A chave mestra deve ter ao menos 8 caracteres, com maiúscula, minúscula, número e caractere especial.</div>
+            <button class="primary-btn" type="submit">Alterar chave mestra</button>
+          </form>
+        </section>
+      </section>
+
+      <section class="view" id="scoreView">
+        <div class="page-head"><div><p class="eyebrow">JORNADA DE PROTEÇÃO</p><h1>Meu score</h1><p class="subtitle">Sua dedicação em manter credenciais operacionais mais fortes.</p></div></div>
+        <section class="score-hero">
+          <div class="score-orbit"><strong id="scoreValue">0</strong><span>PONTOS</span></div>
+          <div class="score-copy"><p class="eyebrow" id="scoreLevelLabel">NÍVEL INICIAL</p><h2 id="scoreTitle">Comece sua jornada</h2><p id="scoreMessage"></p><div class="level-track"><i id="scoreProgress"></i></div><small id="nextLevelText"></small></div>
+        </section>
+        <div class="score-metrics">
+          <article><span>CARDS PROTEGIDOS</span><strong id="scoreEntries">0</strong><small>+100 pontos por card</small></article>
+          <article><span>FORÇA MÉDIA</span><strong id="averageStrength">0%</strong><small>até +300 por senha</small></article>
+          <article><span>SENHAS FORTES</span><strong id="strongPasswords">0</strong><small>credenciais bem construídas</small></article>
+        </div>
+        <section class="score-advice"><div class="panel-title"><span>★</span><div><h2>Próximos passos</h2><p>Recomendações calculadas para o seu cofre</p></div></div><div id="scoreAdvice"></div></section>
+        <section class="levels-card"><h2>Níveis de dedicação</h2><div class="levels-grid" id="levelsGrid"></div></section>
+      </section>
+
+      <section class="view" id="aboutView">
+        <div class="page-head"><div><p class="eyebrow">CONHEÇA O PASS-MAN</p><h1>Sobre o projeto</h1><p class="subtitle">Um cofre local pensado para credenciais de ambientes operacionais.</p></div></div>
+        <div class="about-flow">
+          <article><span>01</span><div><h2>Por que é importante</h2><p>Credenciais fracas, repetidas ou compartilhadas ampliam o risco de acesso indevido a sistemas OT. O Pass-Man ajuda a centralizar, organizar e fortalecer esses acessos, mantendo o usuário consciente da qualidade das próprias senhas.</p></div></article>
+          <article><span>02</span><div><h2>Como usar</h2><p>No primeiro acesso, crie sua chave mestra. Cadastre título, login e senha em “Cofre de acessos”, ou produza uma senha no gerador. Use busca, cópia e edição para administrar os cards. Exporte um backup completo ou seletivo com uma chave exclusiva e use essa mesma chave ao importar.</p></div></article>
+          <article><span>03</span><div><h2>Como seus dados são protegidos</h2><div class="protection-explainer">
+            <p><strong>Um cofre fechado, não uma lista legível.</strong> Títulos, logins e senhas são transformados em dados incompreensíveis antes de serem armazenados. Qualquer alteração indevida também é detectada.</p>
+            <p><strong>Quantas tentativas seriam necessárias?</strong> A criptografia AES-256 trabalha com 2<sup>256</sup> possibilidades — aproximadamente <b>1,16 × 10<sup>77</sup> combinações</b>. Em média, seria preciso testar metade delas para encontrar a chave correta.</p>
+            <p><strong>Quanto tempo isso representa?</strong> Em um cenário puramente teórico de um quintilhão de tentativas por segundo (10<sup>18</sup>), testar metade do espaço levaria cerca de <b>1,8 × 10<sup>51</sup> anos</b>. Isso é imensamente superior à idade estimada do universo.</p>
+            <p><strong>O ponto mais importante:</strong> um invasor normalmente tentaria adivinhar sua chave mestra, e não quebrar diretamente o AES-256. Por isso o Pass-Man executa 600.000 operações de derivação para cada tentativa. Ainda assim, uma chave curta ou previsível pode ser descoberta muito antes. Use uma frase longa, exclusiva e difícil de adivinhar.</p>
+            <p><strong>Proteção durante o uso.</strong> A chave de abertura fica somente na memória enquanto a sessão está ativa e é descartada após uma hora. Cada backup recebe sua própria chave, e cada gravação utiliza valores aleatórios novos.</p>
+          </div></div></article>
+          <article><span>04</span><div><h2>Autor</h2><p>Projeto criado por <strong>Carlos Thassius</strong>, com foco em segurança, usabilidade e conscientização para gestão de credenciais operacionais.</p></div></article>
+          <article class="privacy-architecture"><span>05</span><div><h2>Privacidade por arquitetura</h2><p><strong>O Pass-Man funciona localmente e não possui servidor, conta online, telemetria ou sincronização em nuvem.</strong> As credenciais não são enviadas pela internet. O cofre criptografado permanece neste dispositivo, e somente os backups criados pelo próprio usuário podem sair dele.</p><div class="local-data-list"><b>O que fica neste dispositivo:</b><ul><li>cofre criptografado com credenciais e classificações;</li><li>salt, IV e parâmetros públicos da criptografia;</li><li>preferência de tema e prazo local da sessão;</li><li>nenhuma chave mestra, biometria ou senha em texto aberto após o bloqueio.</li></ul></div></div></article>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <div class="lock-screen" id="lockScreen">
+    <section class="unlock-card" role="dialog" aria-modal="true" aria-labelledby="unlockTitle">
+      <div class="vault-chase" aria-hidden="true"><svg viewBox="0 0 180 64"><path class="maze-line" d="M2 9h46v13H20v33h54M178 55h-35V31h19V9h-40"/><path class="chomper" d="M84 32L102 21A22 22 0 1 0 102 43Z"/><circle class="crumb" cx="116" cy="32" r="3"/><circle class="crumb" cx="127" cy="32" r="3"/><g class="vault-lock"><rect x="140" y="27" width="28" height="24" rx="2"/><path d="M146 27v-7a8 8 0 0 1 16 0v7"/><circle cx="154" cy="38" r="2"/><path d="M154 40v5"/></g></svg></div>
+      <p class="eyebrow">PASS-MAN · ACESSO PROTEGIDO</p>
+      <h1 id="unlockTitle">Cofre bloqueado</h1>
+      <p id="unlockDescription">Informe sua chave mestra para acessar o cofre.</p>
+      <form id="masterForm">
+        <input type="hidden" id="unlockMode" value="login">
+        <div id="loginFields"><label>Chave mestra<div class="password-input"><input id="masterPassword" type="password" minlength="8" required autocomplete="current-password"><button type="button" id="toggleMasterPassword" class="eye-action" title="Mostrar chave mestra" aria-label="Mostrar chave mestra"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 3l18 18M10.6 6.2A11 11 0 0 1 12 6c6.5 0 10 6 10 6a16 16 0 0 1-2.1 2.8M6.4 6.4C3.5 8.2 2 12 2 12s3.5 6 10 6c1.5 0 2.8-.3 4-.8M9.9 9.9a3 3 0 0 0 4.2 4.2"/></svg></button></div></label></div>
+        <div id="setupFields" hidden><label>Escolha a chave mestra<div class="password-input"><input id="masterSetupPassword" type="password" minlength="8" autocomplete="new-password"><button type="button" id="toggleSetupPassword" class="eye-action" title="Mostrar chave mestra" aria-label="Mostrar chave mestra"></button></div></label><label>Confirme a chave mestra<div class="password-input"><input id="masterConfirm" type="password" minlength="8" autocomplete="new-password"><button type="button" id="toggleMasterConfirm" class="eye-action" title="Mostrar chave mestra" aria-label="Mostrar chave mestra"></button></div></label></div>
+        <div id="recoveryUpload" hidden><label>Chave de recuperação<input id="recoveryFile" type="file" accept="application/json,.json"></label><button class="secondary-btn full" type="button" id="backToLoginBtn">Voltar ao login</button></div>
+        <p id="recoverySetupNotice" class="settings-note" hidden>Após confirmar a nova chave, o download de uma nova chave de recuperação será obrigatório. A anterior deixa de valer.</p>
+        <p class="master-error" id="masterError" role="alert"></p>
+        <button class="primary-btn full" type="submit" id="masterSubmit">Criar chave e entrar</button>
+      </form>
+      <div id="unlockActions" class="unlock-actions"><button class="primary-btn full" type="submit" form="masterForm" id="unlockEnterBtn">Entrar</button><div class="unlock-links"><button type="button" id="firstAccessBtn">Primeiro Acesso</button><button type="button" id="forgotMasterBtn">Esqueci minha chave</button></div></div>
+      <button class="reset-vault-link" id="resetVaultBtn" type="button" hidden>Apagar cofre deste navegador</button>
+    </section>
+  </div>
+
+  <div class="modal-backdrop reset-vault-modal" id="resetVaultModal" aria-hidden="true">
+    <section class="modal" role="dialog" aria-modal="true" aria-labelledby="resetVaultTitle">
+      <div class="modal-head"><div><p class="eyebrow">AÇÃO IRREVERSÍVEL</p><h2 id="resetVaultTitle">Apagar cofre local</h2></div><button class="icon-btn" id="closeResetVaultModal" aria-label="Fechar">×</button></div>
+      <p class="reset-vault-warning">Todas as credenciais, chaves de recuperação e sessões do Pass-Man neste navegador serão apagadas. Backups exportados não serão removidos.</p>
+      <label class="reset-vault-confirmation">Digite <b>APAGAR</b> para confirmar<input id="resetConfirmation" type="text" autocomplete="off" spellcheck="false"></label>
+      <div class="form-actions"><button class="secondary-btn" type="button" id="cancelResetVault">Cancelar</button><button class="danger-btn" type="button" id="confirmResetVault" disabled>Apagar cofre</button></div>
+    </section>
+  </div>
+
+  <small class="copyright">Copyright by: Carlos Thassius</small>
+
+  <div class="modal-backdrop" id="entryModal" aria-hidden="true">
+    <section class="modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+      <div class="modal-head"><div><p class="eyebrow">REGISTRO DE CREDENCIAL</p><h2 id="modalTitle">Novo acesso</h2></div><button class="icon-btn" id="closeModal" aria-label="Fechar">×</button></div>
+      <form id="entryForm">
+        <input type="hidden" id="entryId">
+        <label>Título do acesso <span>*</span><input id="entryTitle" maxlength="80" required placeholder="Ex.: IHM Linha de Envase"></label>
+        <label>Login / usuário <span>*</span><input id="entryLogin" maxlength="120" required autocomplete="off" placeholder="Ex.: operador.turno"></label>
+        <label>Senha <span>*</span>
+          <div class="password-input"><input id="entryPassword" type="password" required autocomplete="new-password" placeholder="Digite ou gere uma senha"><button type="button" id="toggleFormPassword" class="eye-action" title="Mostrar senha" aria-label="Mostrar senha"><svg viewBox="0 0 24 24"><path d="M2 12s3.5-6 10-6 10 6 10 6-3.5 6-10 6S2 12 2 12Z"/><circle cx="12" cy="12" r="3"/></svg></button></div>
+        </label>
+        <div class="classification-grid">
+          <label>Criticidade<select id="entryCriticality"><option value="Baixa">Baixa</option><option value="Média" selected>Média</option><option value="Alta">Alta</option><option value="Crítica">Crítica</option></select></label>
+          <label>Sistema<input id="entrySystem" maxlength="80" placeholder="Ex.: SCADA"></label>
+          <label>Área<input id="entryArea" maxlength="80" placeholder="Ex.: Utilidades"></label>
+          <label>Proprietário<input id="entryOwner" maxlength="100" placeholder="Ex.: Automação"></label>
+          <label class="wide-field">Fornecedor<input id="entrySupplier" maxlength="100" placeholder="Ex.: Integrador responsável"></label>
+        </div>
+        <button class="inline-generator" type="button" id="openGeneratorBtn">✦ Abrir gerador de senhas</button>
+        <div class="form-actions"><button class="secondary-btn" type="button" id="cancelModal">Cancelar</button><button class="primary-btn" type="submit">Salvar acesso</button></div>
+      </form>
+    </section>
+  </div>
+
+  <div class="modal-backdrop" id="exportModal" aria-hidden="true">
+    <section class="modal export-modal" role="dialog" aria-modal="true" aria-labelledby="exportTitle">
+      <div class="modal-head"><div><p class="eyebrow">BACKUP CRIPTOGRAFADO</p><h2 id="exportTitle">Preparar exportação</h2></div><button class="icon-btn" id="closeExportModal" aria-label="Fechar">×</button></div>
+      <form id="exportForm">
+        <fieldset class="export-scope">
+          <legend>O que deseja exportar?</legend>
+          <label class="scope-option"><input type="radio" name="exportScope" value="full" checked><span><b>Backup completo</b><small>Todos os cards do cofre</small></span></label>
+          <label class="scope-option"><input type="radio" name="exportScope" value="selected"><span><b>Selecionar cards</b><small>Somente os acessos marcados</small></span></label>
+        </fieldset>
+        <div class="export-selection" id="exportSelection" hidden><div class="selection-head"><span>CARDS DISPONÍVEIS</span><button type="button" id="selectAllExport">Marcar todos</button></div><div id="exportCards"></div></div>
+        <label>Chave exclusiva do backup <span>*</span><input id="backupPassword" type="password" minlength="12" required autocomplete="new-password" placeholder="Mínimo de 12 caracteres"></label>
+        <label>Confirme a chave do backup <span>*</span><input id="backupPasswordConfirm" type="password" minlength="12" required autocomplete="new-password"></label>
+        <p class="backup-warning">Essa chave será usada somente para este arquivo. Sem ela, o backup não poderá ser recuperado.</p>
+        <div class="form-actions"><button class="secondary-btn" type="button" id="cancelExportModal">Cancelar</button><button class="primary-btn" type="submit" id="confirmExportBtn">Criptografar e exportar</button></div>
+      </form>
+    </section>
+  </div>
+
+  <div class="toast" id="toast" role="status"><span>✓</span><p></p></div>
+  <script src="app.js"></script>
+</body>
+</html>
