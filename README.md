@@ -1,211 +1,683 @@
-# Pass-Man
+<div align="center">
 
-Gerenciador local de senhas operacionais com uma identidade inspirada em jogos de labirinto. O projeto combina uma interface leve com controles criptográficos para guardar credenciais de ambientes OT sem enviar dados a serviços externos.
+# 🕹️ Pass-Man
 
-Projeto desenvolvido por **Carlos Thassius**.
+### *Gerenciador Local de Senhas Operacionais com Gamificação para Ambientes OT*
 
-> **Local-first:** o cofre existe somente no armazenamento do navegador. Limpar os dados do site, trocar de perfil/navegador ou remover o armazenamento local pode apagar o cofre. Exporte e guarde backups criptografados fora do navegador.
+<p align="center">
+  <img src="https://img.shields.io/badge/Security-Local--First-brightgreen?style=for-the-badge&logo=shield&logoColor=white" alt="Local First" />
+  <img src="https://img.shields.io/badge/Encryption-AES--256--GCM-blue?style=for-the-badge&logo=lock&logoColor=white" alt="AES-256-GCM" />
+  <img src="https://img.shields.io/badge/Stack-Vanilla_JS_%7C_HTML5_%7C_CSS3-orange?style=for-the-badge&logo=javascript&logoColor=white" alt="Tech Stack" />
+  <img src="https://img.shields.io/badge/License-MIT-yellow?style=for-the-badge&logo=open-source-initiative&logoColor=white" alt="License MIT" />
+</p>
 
-## Visão geral
+<p align="center">
+  <b>Desenvolvido por <a href="https://github.com/carlosthassius">Carlos Thassius</a></b>
+</p>
 
-O Pass-Man cadastra, pesquisa, edita e exclui credenciais compostas por título, login e senha. Os registros ficam em um cofre criptografado no navegador e só permanecem legíveis em memória enquanto a sessão está desbloqueada.
+</div>
 
-Principais recursos:
+---
 
-- gerador criptograficamente seguro de senhas;
-- escolha de comprimento e classes de caracteres;
-- avaliação de força e score educativo;
-- backup criptografado completo ou seletivo;
-- chave independente para cada backup;
-- autoteste criptográfico antes do download;
-- importação autenticada;
-- classificação por criticidade, sistema, área, proprietário e fornecedor;
-- limpeza programada da área de transferência após dois minutos;
-- temas claro e escuro;
-- orientações de gestão de credenciais;
-- interface responsiva.
+> ⚠️ **Aviso Importante — Local-First**
+>
+> O cofre existe **exclusivamente no armazenamento local do navegador (`LocalStorage`)**. Limpar os dados do site, trocar de perfil/navegador ou remover o armazenamento local pode apagar o cofre.
+>
+> **Exporte e armazene backups criptografados com frequência fora do navegador.**
 
-## Importância
+---
 
-Ambientes de tecnologia operacional possuem requisitos particulares de disponibilidade, segurança e rastreabilidade. Senhas fracas, reutilizadas ou compartilhadas ampliam o impacto de acessos indevidos a IHMs, estações de engenharia, sistemas SCADA e conexões de fornecedores.
+## 📸 Interface
 
-O Pass-Man oferece organização, geração de credenciais fortes e feedback educativo. É um projeto local demonstrativo e não substitui uma solução corporativa auditada de PAM, IAM ou gestão de segredos.
+<div align="center">
 
-## Execução
+<table>
+  <tr>
+    <td width="50%">
+      <img src="docs/screenshots/vault-unlocked.png" alt="Cofre desbloqueado" width="100%"/>
+      <p align="center"><b>Dashboard do Cofre Desbloqueado</b></p>
+    </td>
+    <td width="50%">
+      <img src="docs/screenshots/generator-modal.png" alt="Gerador de senhas" width="100%"/>
+      <p align="center"><b>Gerador Criptográfico de Senhas</b></p>
+    </td>
+  </tr>
+  <tr>
+    <td width="50%">
+      <img src="docs/screenshots/backup-export.png" alt="Exportação de backup" width="100%"/>
+      <p align="center"><b>Exportação / Backup Autenticado</b></p>
+    </td>
+    <td width="50%">
+      <img src="docs/screenshots/dark-light-theme.png" alt="Temas claro e escuro" width="100%"/>
+      <p align="center"><b>Suporte a Temas Dark / Light</b></p>
+    </td>
+  </tr>
+</table>
 
-O projeto não exige build nem instalação de pacotes:
+</div>
 
-1. Baixe os arquivos.
-2. Abra **index.html** em um navegador moderno.
-3. No primeiro acesso, crie e confirme uma chave mestra com pelo menos 8 caracteres, incluindo letras maiúsculas e minúsculas, número e caractere especial.
-4. Baixe e guarde a chave de recuperação gerada pelo Pass-Man. Ela é exigida caso a chave mestra seja perdida e é invalidada após cada recuperação.
-5. Cadastre os acessos ou utilize o gerador.
+---
 
-Para maior consistência da Web Crypto API, sirva a pasta por localhost ou HTTPS:
+## 💡 Visão Geral
 
-    python -m http.server 8080
+O **Pass-Man** é um gerenciador local de credenciais desenvolvido com foco em **segurança, privacidade e educação em boas práticas de autenticação em ambientes de Tecnologia Operacional (OT)**.
 
-Depois acesse **http://localhost:8080**.
+A aplicação permite cadastrar, pesquisar, editar e excluir credenciais compostas por título, login e senha, organizando-as em um **cofre criptografado localmente**.
 
-## Estrutura
+A identidade visual utiliza referências genéricas ao universo dos jogos arcade, combinando elementos de labirinto, pontuação e personagens para transformar a avaliação da segurança das credenciais em uma experiência mais interativa.
 
-    Pass-manager/
-    ├── index.html    # estrutura, navegação, formulários e modais
-    ├── styles.css    # temas, responsividade e identidade visual
-    ├── app.js        # cofre, criptografia, backup, sessão e score
-    └── README.md
+### 🎯 Objetivo
 
-## Arquitetura criptográfica
+Mais do que armazenar senhas, o Pass-Man busca **ensinar o usuário a criar e manter credenciais mais seguras**.
 
-### Cofre local
+O sistema possui um motor de avaliação em tempo real que analisa características das credenciais, gera pontuações e utiliza elementos visuais para indicar vulnerabilidades e oportunidades de melhoria.
 
-Título, login, senha e metadados são serializados em um payload JSON e cifrados com **AES-256-GCM**, fornecendo confidencialidade e autenticação.
+---
 
-- AES-GCM com chave de 256 bits;
-- IV aleatório de 96 bits, renovado em cada gravação;
-- salt aleatório de 128 bits;
-- PBKDF2-HMAC-SHA-256 com 600.000 iterações;
-- chave AES criada como CryptoKey não exportável.
+## ✨ Principais Recursos
 
-O armazenamento contém somente metadados criptográficos, salt, IV e ciphertext. Login e título recebem a mesma proteção da senha.
+* 🔐 **Local-First:** processamento e armazenamento realizados localmente no navegador.
+* 🚫 **Zero Backend:** não depende de servidor para armazenar credenciais.
+* 📡 **Zero Telemetria:** nenhuma credencial é enviada para serviços externos.
+* 🕹️ **Gamificação:** sistema de pontuação, níveis e feedback visual.
+* 🎲 **Gerador criptograficamente seguro:** utiliza `crypto.getRandomValues()`.
+* 🔑 **Chave mestra:** utilizada para proteger o acesso ao cofre.
+* ♻️ **Chave de recuperação:** gerada automaticamente no primeiro acesso.
+* 📦 **Backups criptografados:** exportação completa ou seletiva.
+* 🧪 **Autoteste de backup:** validação criptográfica antes do download.
+* 📋 **Limpeza automática da área de transferência:** após dois minutos.
+* 🏷️ **Classificação operacional:** criticidade, sistema, área, proprietário e fornecedor.
+* 🎨 **Interface responsiva:** suporte a temas claro e escuro.
+* 🔒 **CSP restritiva:** aplicação preparada para operação sem conexões externas.
 
-### Chave mestra e memória
+---
 
-A chave mestra não é salva. Ela protege uma chave interna do cofre, que por sua vez cifra os dados. A chave interna existe apenas em memória após o desbloqueio; as credenciais descriptografadas também são retiradas do estado e da tela no bloqueio.
+# 🏭 Contexto em Ambientes OT
 
-No primeiro acesso, o aplicativo baixa uma chave de recuperação com identificador único. Esse arquivo é necessário para redefinir uma chave mestra perdida no mesmo cofre local. Ao concluir a recuperação, o arquivo utilizado é invalidado e uma nova chave de recuperação é baixada.
+Ambientes de **Tecnologia Operacional (OT)** apresentam requisitos específicos relacionados a disponibilidade, segurança, continuidade operacional e controle de acesso.
 
-A sessão possui limite absoluto de uma hora. Recarregar a aplicação exige novo desbloqueio, pois a chave não é persistida no sessionStorage.
+Na rotina de **Automação e Sistemas de Controle**, profissionais podem lidar com credenciais utilizadas em:
 
-### Backups independentes
+* IHMs;
+* estações de engenharia;
+* sistemas SCADA;
+* PLCs;
+* RTUs;
+* IEDs;
+* equipamentos de telecomunicações;
+* switches e roteadores industriais;
+* servidores e estações de operação.
 
-Cada exportação solicita uma chave exclusiva e permite selecionar todos os cards ou somente registros específicos. Para cada arquivo são criados novo salt, nova chave derivada e novo IV.
+O armazenamento inadequado de credenciais, reutilização de senhas ou utilização de senhas previsíveis pode aumentar o impacto de um acesso indevido.
 
-A chave mestra do cofre e a chave derivada nunca são incluídas no arquivo. Na importação, a senha do backup autentica e descriptografa o envelope. Os registros recuperados são imediatamente recifrados com a chave do cofre destinatário.
+O Pass-Man foi desenvolvido como uma **solução experimental e educacional**, explorando como conceitos de segurança, criptografia, UX e gamificação podem ser aplicados ao contexto de OT.
 
-Estrutura resumida do envelope:
+> ⚠️ **Importante:** o Pass-Man é um projeto local demonstrativo e **não substitui soluções corporativas auditadas de PAM, IAM ou gerenciamento de segredos**.
 
-    {
-      "app": "Pass-Man",
-      "version": 2,
-      "encryption": {
-        "algorithm": "AES-256-GCM",
-        "kdf": "PBKDF2-HMAC-SHA-256",
-        "iterations": 600000
-      },
-      "salt": "base64",
-      "iv": "base64",
-      "ciphertext": "base64",
-      "scope": "full",
-      "itemCount": 10
-    }
+---
 
-Alterações no ciphertext ou senhas incorretas fazem a autenticação AES-GCM falhar.
+# 🚀 Execução
 
-Antes de disponibilizar o download, a aplicação descriptografa em memória o envelope recém-criado e compara o conteúdo recuperado com os cards selecionados. O arquivo só é baixado se autenticação, descriptografia e comparação forem concluídas corretamente.
+O projeto não utiliza frameworks, pré-processadores ou ferramentas de build.
 
-## Migração
+Não é necessário instalar `npm`, Node.js ou dependências externas.
 
-Versões anteriores utilizavam **passman_credentials_v1**. Após um desbloqueio válido, registros antigos são migrados para **passman_encrypted_vault_v2**, e a cópia em texto aberto é removida.
+### 1. Clone o repositório
 
-## Gerador
+```bash
+git clone https://github.com/carlosthassius/Pass-Man.git
+cd Pass-Man
+```
 
-O gerador utiliza **crypto.getRandomValues()**, não Math.random(). O usuário escolhe comprimento entre 6 e 64 caracteres, letras maiúsculas, minúsculas, números e símbolos. O algoritmo garante ao menos um caractere de cada classe selecionada e embaralha o resultado.
+### 2. Execute um servidor HTTP local
 
-## Score
+Para maior consistência e compatibilidade com a **Web Crypto API**, recomenda-se servir a aplicação através de um servidor HTTP local.
 
-O score é calculado em tempo real e não é persistido:
+Com Python:
 
-- cada card soma 100 pontos;
-- a força soma até 300 pontos por card;
-- comprimento e variedade elevam a avaliação;
-- padrões previsíveis e repetições reduzem a força;
-- reutilização gera recomendações.
+```bash
+python -m http.server 8080
+```
 
-| Pontos | Nível |
-|---:|---|
-| 0 | Iniciante |
-| 500 | Básico |
-| 1.500 | Intermediário |
-| 3.000 | Avançado |
-| 6.000 | Expert |
-| 9.000 | Master |
+### 3. Acesse a aplicação
 
-O score é educativo e não representa certificação ou garantia de segurança.
+Abra:
 
-### Indicador visual de força
+```text
+http://localhost:8080
+```
 
-O indicador do card usa uma escala mais tolerante, baseada no comprimento, variedade de caracteres e padrões previsíveis:
+Também é possível abrir diretamente o `index.html`, embora o uso de um servidor local seja recomendado.
 
-- **Fraca**: abaixo de 40 pontos — monstrinho vermelho;
-- **Média**: de 40 a 64 pontos — monstrinho amarelo;
-- **Forte**: 65 pontos ou mais — carinha feliz.
+### 4. Primeiro acesso
 
-Como referência, uma senha de 8 caracteres que mistura maiúscula, minúscula, número e símbolo tende a ficar como média; a partir de aproximadamente 9 caracteres com essa mesma variedade, ela passa para forte. Sequências comuns, repetições e termos como `senha`, `password`, `admin`, `1234` ou `qwerty` reduzem a pontuação.
+Na primeira execução:
 
-## Privacidade
+1. Crie uma chave mestra;
+2. Confirme a chave;
+3. Utilize pelo menos 8 caracteres;
+4. Inclua letras maiúsculas, minúsculas, números e caracteres especiais.
 
-Não existe backend, telemetria ou envio de credenciais. Dados sensíveis permanecem no navegador e nos backups escolhidos pelo usuário.
+### 5. Guarde a chave de recuperação
 
-A aplicação não referencia fontes, scripts, estilos ou imagens hospedados externamente. Utiliza fontes do sistema e uma Content Security Policy que define **connect-src 'none'**, bloqueando conexões iniciadas pela página. Os arquivos executáveis foram verificados estaticamente para confirmar a ausência de URLs e importações externas.
+No primeiro acesso, o Pass-Man gera uma **chave de recuperação**.
 
-Dados locais:
+Guarde esse arquivo em um local seguro.
 
-- envelope criptografado do cofre, incluindo credenciais e classificações;
-- salt, IV e parâmetros criptográficos públicos;
-- preferência de tema;
-- horário de expiração da sessão;
-- nenhuma chave mestra persistida.
+A chave é necessária caso a chave mestra seja perdida e possui uso único: após uma recuperação bem-sucedida, ela é invalidada e uma nova chave é gerada.
 
-## Área de transferência
+---
 
-Depois de copiar login ou senha, o Pass-Man agenda a substituição da área de transferência por conteúdo vazio após dois minutos. Navegadores podem recusar essa operação quando a página perde foco ou a permissão de clipboard é retirada; nesse caso, a aplicação informa a falha. O comportamento não substitui políticas de clipboard do sistema operacional.
+# 🔐 Arquitetura Criptográfica
 
-## Classificação operacional
+## Cofre Local
 
-Cada card pode receber:
+Os dados do cofre são serializados em um payload JSON e cifrados utilizando **AES-256-GCM**, fornecendo confidencialidade e autenticação dos dados.
 
-- criticidade: baixa, média, alta ou crítica;
-- sistema;
-- área;
-- proprietário;
-- fornecedor.
+### Parâmetros
 
-Esses campos são incluídos dentro do payload criptografado e participam da busca local. Não são gravados separadamente em texto aberto.
+| Componente       | Implementação       |
+| ---------------- | ------------------- |
+| Algoritmo        | AES-GCM             |
+| Tamanho da chave | 256 bits            |
+| IV               | 96 bits aleatórios  |
+| Salt             | 128 bits aleatórios |
+| KDF              | PBKDF2-HMAC-SHA-256 |
+| Iterações        | 600.000             |
+| API              | Web Crypto API      |
+| Armazenamento    | LocalStorage        |
 
-## Validação offline
+O armazenamento persistente contém apenas:
 
-O teste estático confirmou que **index.html**, **styles.css** e **app.js** não possuem referências HTTP, importações de fontes ou recursos externos. A CSP bloqueia conexões de saída da aplicação. Como teste de aceitação, recomenda-se também abrir, cadastrar, bloquear, desbloquear, exportar e importar um cofre em uma estação com os adaptadores de rede desativados.
+* metadados criptográficos;
+* salt;
+* IV;
+* parâmetros necessários para derivação;
+* ciphertext.
 
-## Limitações e modelo de ameaça
+Título, login, senha e metadados operacionais recebem a mesma proteção criptográfica.
 
-Criptografia em repouso não protege o conteúdo enquanto o cofre está aberto. Código malicioso na mesma origem, extensões comprometidas, malware, captura de teclado ou uma estação já comprometida ainda podem acessar informações.
+---
 
-Para produção, considere CSP restritiva, hospedagem HTTPS, revisão independente, MFA, trilhas de auditoria, integração com PAM, segmentação OT, endurecimento da estação e procedimentos de recuperação e rotação de chaves.
+## 🔑 Gerenciamento de Chaves
 
-### Nota importante sobre recuperação
+A **chave mestra não é armazenada diretamente**.
 
-A chave de recuperação redefine a chave mestra apenas enquanto o cofre local ainda existe. Ela não substitui um backup: se os dados do navegador forem apagados, restaure a partir de um backup criptografado exportado anteriormente.
+Ela é utilizada para proteger uma chave interna do cofre. Essa chave interna é mantida somente em memória durante a sessão desbloqueada.
 
-## Tecnologias
+As credenciais descriptografadas também permanecem disponíveis somente enquanto o cofre está desbloqueado.
 
-- HTML5 semântico;
-- CSS responsivo;
-- JavaScript sem frameworks;
-- Web Crypto API;
-- Web Storage API;
-- SVG próprio.
+Ao bloquear o cofre:
 
-## Identidade visual
+* a chave interna é removida da memória da aplicação;
+* as credenciais deixam de estar disponíveis na interface;
+* o usuário precisa realizar um novo desbloqueio.
 
-A marca utiliza personagem circular original, labirintos e pontos de percurso como referência genérica a jogos arcade. Nenhum sprite, logotipo ou ativo oficial de terceiros é distribuído.
+### Sessão
 
-## Autor
+A sessão possui limite absoluto de **1 hora**.
 
-**Carlos Thassius**
+A chave não é persistida no `sessionStorage`, portanto uma recarga da aplicação exige novo desbloqueio.
 
-Projeto criado para estudo, portfólio e conscientização sobre gestão de credenciais operacionais.
+---
 
-## Código aberto
+# 🔑 Chave de Recuperação
 
-O projeto é distribuído sob a [Licença MIT](LICENSE). Veja [CONTRIBUTING.md](CONTRIBUTING.md) para contribuir, [SECURITY.md](SECURITY.md) para reportar vulnerabilidades e [docs/screenshots](docs/screenshots/README.md) para preparar as imagens do repositório.
+Durante o primeiro acesso, o aplicativo gera automaticamente uma chave de recuperação com identificador único.
+
+Ela permite redefinir a chave mestra do cofre local caso a chave original seja perdida.
+
+Fluxo simplificado:
+
+```text
+Primeiro acesso
+      │
+      ▼
+Geração da chave de recuperação
+      │
+      ▼
+Usuário armazena o arquivo
+      │
+      ▼
+Perda da chave mestra
+      │
+      ▼
+Recuperação autenticada
+      │
+      ▼
+Chave anterior invalidada
+      │
+      ▼
+Nova chave de recuperação gerada
+```
+
+A chave utilizada para recuperação é invalidada após o uso.
+
+---
+
+# 📦 Backups Criptografados
+
+O Pass-Man permite exportar:
+
+* todo o cofre;
+* registros selecionados.
+
+Cada backup possui uma **chave exclusiva**, independente da chave mestra do cofre.
+
+Para cada exportação são gerados:
+
+* novo salt;
+* nova chave derivada;
+* novo IV.
+
+A chave mestra do cofre e a chave derivada **nunca são incluídas no arquivo de backup**.
+
+---
+
+## Estrutura do Envelope JSON
+
+Exemplo simplificado:
+
+```json
+{
+  "app": "Pass-Man",
+  "version": 2,
+  "encryption": {
+    "algorithm": "AES-256-GCM",
+    "kdf": "PBKDF2-HMAC-SHA-256",
+    "iterations": 600000
+  },
+  "salt": "base64...",
+  "iv": "base64...",
+  "ciphertext": "base64...",
+  "scope": "full",
+  "itemCount": 10
+}
+```
+
+---
+
+## 🧪 Autoteste de Download
+
+Antes de disponibilizar o arquivo para download, a aplicação:
+
+1. gera o envelope criptografado;
+2. descriptografa o envelope em memória;
+3. recupera os dados;
+4. compara o conteúdo recuperado com os registros selecionados;
+5. somente então disponibiliza o arquivo.
+
+Isso permite detectar falhas no processo de serialização, criptografia ou geração do arquivo antes que o backup seja entregue ao usuário.
+
+---
+
+# 🔄 Migração de Dados
+
+Versões anteriores utilizavam a estrutura:
+
+```text
+passman_credentials_v1
+```
+
+Após um desbloqueio válido, os registros antigos são migrados para:
+
+```text
+passman_encrypted_vault_v2
+```
+
+A aplicação remove a estrutura anterior em texto aberto após a migração.
+
+---
+
+# 🎲 Gerador de Senhas
+
+O gerador utiliza:
+
+```javascript
+crypto.getRandomValues()
+```
+
+em vez de:
+
+```javascript
+Math.random()
+```
+
+O usuário pode selecionar:
+
+* comprimento entre **6 e 64 caracteres**;
+* letras maiúsculas;
+* letras minúsculas;
+* números;
+* símbolos.
+
+Quando classes de caracteres são selecionadas, o algoritmo garante a presença de pelo menos um caractere de cada classe e realiza o embaralhamento do resultado.
+
+---
+
+# 🕹️ Gamificação
+
+Um dos principais diferenciais do Pass-Man é transformar a avaliação de segurança das credenciais em uma experiência interativa.
+
+O sistema calcula um **score educativo em tempo real**, incentivando o usuário a melhorar a qualidade das credenciais cadastradas.
+
+## 📊 Regras do Score
+
+* ➕ **+100 pontos** por credencial cadastrada;
+* ➕ **até +300 pontos adicionais** por credencial;
+* 📈 bônus relacionados à complexidade e variedade de caracteres;
+* 📉 penalidades para padrões previsíveis;
+* 📉 penalidades para repetições;
+* 📉 penalidades para palavras-chave comuns;
+* 💡 identificação de reutilização de senhas;
+* 💡 recomendações de melhoria.
+
+Exemplos de padrões considerados:
+
+```text
+1234
+123456
+qwerty
+admin
+senha
+```
+
+> O score é **puramente educativo**, calculado localmente e não é persistido como informação de segurança.
+
+---
+
+# 👻 Indicadores Visuais
+
+Cada credencial recebe um indicador visual baseado em sua pontuação.
+
+|     Score | Classificação | Indicador             |
+| --------: | ------------- | --------------------- |
+|    `< 40` | 🔴 Fraca      | Monstrinho estressado |
+| `40 – 64` | 🟡 Média      | Monstrinho atento     |
+|     `65+` | 🟢 Forte      | Carinha satisfeita    |
+
+A classificação serve como mecanismo de **feedback educativo**, e não como uma estimativa formal de resistência criptográfica ou de tempo necessário para quebra.
+
+---
+
+# 🏆 Níveis do Jogador
+
+A pontuação acumulada também determina o nível do jogador.
+
+|     Pontuação | Nível             | Classificação            |
+| ------------: | ----------------- | ------------------------ |
+|       0 – 499 | 🐣 Iniciante      | Aprendiz de Segurança    |
+|   500 – 1.499 | 🟡 Básico         | Operador Inicial         |
+| 1.500 – 2.999 | 🛡️ Intermediário | Analista Prático         |
+| 3.000 – 5.999 | ⚔️ Avançado       | Guardião do Cofre        |
+| 6.000 – 8.999 | 🌟 Expert         | Mestre em Cripto         |
+|        9.000+ | 👑 Master         | Defensor de Nível Mestre |
+
+---
+
+# 🛡️ Privacidade
+
+O Pass-Man segue uma abordagem **Local-First**.
+
+### Não existe:
+
+* ❌ backend;
+* ❌ banco de dados remoto;
+* ❌ API para envio de credenciais;
+* ❌ telemetria;
+* ❌ analytics;
+* ❌ sincronização em nuvem.
+
+Os dados sensíveis permanecem exclusivamente no navegador.
+
+---
+
+## 🔒 Content Security Policy
+
+A aplicação utiliza uma **Content Security Policy (CSP)** restritiva.
+
+Não são utilizadas:
+
+* fontes externas;
+* scripts externos;
+* folhas de estilo externas;
+* imagens hospedadas externamente.
+
+A política também utiliza:
+
+```text
+connect-src 'none'
+```
+
+impedindo conexões iniciadas pela aplicação.
+
+Recomenda-se testar a aplicação em uma estação com os adaptadores de rede desativados para verificar seu comportamento completamente offline.
+
+---
+
+# 📋 Área de Transferência
+
+Quando o usuário copia um login ou senha, o Pass-Man agenda a limpeza da área de transferência após **2 minutos**.
+
+O navegador pode impedir essa operação caso a página perca o foco ou não possua mais permissão para modificar o clipboard.
+
+Quando isso acontece, a aplicação informa o usuário.
+
+---
+
+# 🏷️ Classificação Operacional OT
+
+Cada credencial pode receber metadados relacionados ao contexto operacional:
+
+* **Criticidade:** Baixa, Média, Alta ou Crítica;
+* **Sistema;**
+* **Área;**
+* **Proprietário;**
+* **Fornecedor.**
+
+Essas informações são armazenadas **dentro do payload criptografado** e também participam das pesquisas realizadas localmente.
+
+Não são mantidas cópias separadas em texto aberto.
+
+---
+
+# ⚠️ Limitações e Modelo de Ameaça
+
+A criptografia em repouso não protege os dados enquanto o cofre está desbloqueado.
+
+Um atacante que já tenha comprometido a estação pode potencialmente acessar os dados enquanto eles estiverem disponíveis em memória ou na interface.
+
+O projeto não pretende proteger contra:
+
+* malware presente na estação;
+* keyloggers;
+* extensões de navegador comprometidas;
+* código malicioso executado na mesma origem;
+* comprometimento do navegador;
+* captura de tela;
+* acesso físico à estação desbloqueada;
+* comprometimento do sistema operacional.
+
+Por isso, o Pass-Man deve ser considerado uma **ferramenta experimental/educacional**, e não um substituto para uma arquitetura corporativa de gerenciamento de credenciais.
+
+---
+
+# 🏢 Uso Corporativo
+
+Para utilização em ambientes corporativos de produção, recomenda-se considerar controles adicionais, como:
+
+* MFA;
+* PAM;
+* IAM;
+* trilhas de auditoria;
+* rotação periódica de credenciais;
+* HTTPS;
+* hardening das estações;
+* segmentação de redes OT;
+* controle de acesso baseado em função;
+* revisão independente do código;
+* políticas de recuperação;
+* gestão centralizada de segredos.
+
+---
+
+# 🛠️ Tecnologias
+
+| Tecnologia          | Utilização                        |
+| ------------------- | --------------------------------- |
+| **HTML5**           | Estrutura e semântica             |
+| **CSS3**            | Interface, responsividade e temas |
+| **JavaScript ES6+** | Lógica da aplicação               |
+| **Web Crypto API**  | Criptografia e geração segura     |
+| **LocalStorage**    | Persistência local                |
+| **SVG**             | Elementos visuais                 |
+| **Git/GitHub**      | Versionamento e colaboração       |
+
+O projeto não utiliza frameworks JavaScript nem ferramentas de build.
+
+---
+
+# 📁 Estrutura do Projeto
+
+```text
+Pass-Man/
+├── index.html
+├── styles.css
+├── app.js
+│
+├── src/
+│   ├── crypto.js
+│   ├── vault.js
+│   ├── storage.js
+│   ├── recovery.js
+│   └── ui.js
+│
+├── docs/
+│   ├── ARCHITECTURE.md
+│   └── screenshots/
+│       ├── vault-unlocked.png
+│       ├── generator-modal.png
+│       ├── backup-export.png
+│       └── dark-light-theme.png
+│
+├── CONTRIBUTING.md
+├── SECURITY.md
+├── LICENSE
+└── README.md
+```
+
+### Principais arquivos
+
+| Arquivo           | Responsabilidade                          |
+| ----------------- | ----------------------------------------- |
+| `index.html`      | Estrutura, formulários e modais           |
+| `styles.css`      | Temas, responsividade e identidade visual |
+| `app.js`          | Integração geral da aplicação             |
+| `crypto.js`       | Operações criptográficas                  |
+| `vault.js`        | Estado e gerenciamento do cofre           |
+| `storage.js`      | Persistência no LocalStorage              |
+| `recovery.js`     | Recuperação e backups                     |
+| `ui.js`           | Renderização e interação da interface     |
+| `ARCHITECTURE.md` | Documentação arquitetural                 |
+
+---
+
+# 🎨 Identidade Visual
+
+A identidade visual do Pass-Man utiliza:
+
+* personagem circular original;
+* labirintos;
+* pontos de percurso;
+* fantasmas/monstrinhos;
+* sistema de pontuação;
+* elementos inspirados no universo dos jogos arcade.
+
+A referência é **conceitual e estética**.
+
+Nenhum sprite, logotipo ou ativo oficial de terceiros é utilizado no projeto.
+
+---
+
+# 🧠 Conceitos Explorados
+
+O Pass-Man combina diferentes áreas de conhecimento em um único projeto:
+
+```text
+                ┌────────────────────┐
+                │      Pass-Man      │
+                └─────────┬──────────┘
+                          │
+          ┌───────────────┼───────────────┐
+          │               │               │
+          ▼               ▼               ▼
+     🔐 Segurança      🏭 OT/SCADA      🕹️ UX/Gamificação
+          │               │               │
+          ▼               ▼               ▼
+     Criptografia     Credenciais       Score
+     AES-GCM          Operacionais      Feedback
+     PBKDF2           Classificação     Níveis
+          │               │               │
+          └───────────────┼───────────────┘
+                          ▼
+                  💻 Aplicação Web
+                     Local-First
+```
+
+---
+
+# 📌 Roadmap
+
+Algumas possibilidades de evolução do projeto:
+
+* [ ] Testes automatizados para os módulos criptográficos;
+* [ ] Testes de integridade do cofre;
+* [ ] Expansão da documentação de threat model;
+* [ ] Auditoria independente da implementação criptográfica;
+* [ ] Histórico local de alterações;
+* [ ] Melhorias no sistema de gamificação;
+* [ ] Métricas educativas adicionais;
+* [ ] PWA para operação offline;
+* [ ] Melhorias de acessibilidade;
+* [ ] Documentação arquitetural detalhada;
+* [ ] Testes de compatibilidade entre navegadores.
+
+---
+
+# 🌐 Código Aberto
+
+O Pass-Man é um projeto desenvolvido para estudo, experimentação e demonstração de conceitos relacionados a:
+
+**Segurança + Automação + OT + Desenvolvimento Web + UX + Gamificação.**
+
+Contribuições são bem-vindas.
+
+Para contribuir, consulte:
+
+* [`CONTRIBUTING.md`](CONTRIBUTING.md)
+
+Para reportar vulnerabilidades:
+
+* [`SECURITY.md`](SECURITY.md)
+
+---
+
+# 📄 Licença
+
+Este projeto é distribuído sob a **Licença MIT**.
+
+Consulte [`LICENSE`](LICENSE) para obter o texto completo da licença.
+
+---
+
+<div align="center">
+
+### 🕹️ Pass-Man
+
+**Security should be understandable, usable and built into the workflow.**
+
+<br>
+
+[![GitHub](https://img.shields.io/badge/GitHub-Carlos%20Thassius-181717?style=for-the-badge\&logo=github)](https://github.com/carlosthassius)
+
+</div>
